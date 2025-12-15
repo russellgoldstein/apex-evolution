@@ -2,7 +2,11 @@ class_name EnemyInstance
 extends RefCounted
 ## Runtime instance of an enemy with current state
 
-var data: EnemyData
+# Preload classes
+const EnemyDataScript = preload("res://scripts/resources/enemy_data.gd")
+const IntentDataScript = preload("res://scripts/resources/intent_data.gd")
+
+var data  # EnemyData
 var instance_id: int
 
 ## Current stats
@@ -14,14 +18,14 @@ var status_effects: Dictionary = {}
 
 ## Intent tracking
 var current_intent_index: int = 0
-var current_intent: IntentData
+var current_intent  # IntentData
 
 ## Position in enemy lineup
 var position: int = 0
 
 static var _next_id: int = 0
 
-func _init(enemy_data: EnemyData) -> void:
+func _init(enemy_data) -> void:
 	data = enemy_data
 	instance_id = _next_id
 	_next_id += 1

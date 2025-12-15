@@ -10,7 +10,7 @@ extends Resource
 @export var connections: Array[int] = []
 
 ## For combat nodes
-@export var enemies: Array[EnemyData] = []
+@export var enemies: Array = []  # Array of EnemyData
 
 ## Whether this node has been visited
 @export var visited: bool = false

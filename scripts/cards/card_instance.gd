@@ -2,11 +2,16 @@ class_name CardInstance
 extends RefCounted
 ## Runtime instance of a card in the player's deck
 
+# Preload to ensure class is available
+const CreatureInstanceScript = preload("res://scripts/combat/creature_instance.gd")
+const CreatureCardDataScript = preload("res://scripts/resources/creature_card_data.gd")
+const ActionCardDataScript = preload("res://scripts/resources/action_card_data.gd")
+
 var data: CardData  ## The card data (CreatureCardData or ActionCardData)
 var instance_id: int
 
 ## For creature cards, link to the creature instance
-var creature_instance: CreatureInstance
+var creature_instance
 
 ## Card state
 var is_upgraded: bool = false

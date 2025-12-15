@@ -2,30 +2,35 @@ extends Node
 class_name CombatManager
 ## Manages all combat logic
 
+# Preload classes
+const EnemyInstanceScript = preload("res://scripts/combat/enemy_instance.gd")
+const CreatureInstanceScript = preload("res://scripts/combat/creature_instance.gd")
+const TraitDataScript = preload("res://scripts/resources/trait_data.gd")
+
 signal combat_started
 signal turn_started(is_player_turn: bool)
 signal turn_ended(is_player_turn: bool)
 signal combat_ended(victory: bool)
-signal card_played(card: CardInstance, targets: Array)
-signal damage_dealt(source: Variant, target: Variant, amount: int)
-signal creature_died(creature: CreatureInstance)
-signal enemy_died(enemy: EnemyInstance)
-signal targeting_started(card: CardInstance)
+signal card_played(card, targets: Array)
+signal damage_dealt(source, target, amount: int)
+signal creature_died(creature)
+signal enemy_died(enemy)
+signal targeting_started(card)
 signal targeting_cancelled
 signal energy_changed(current: int, maximum: int)
 
 ## Combat state
 var is_combat_active: bool = false
-var current_phase: Enums.CombatPhase = Enums.CombatPhase.COMBAT_START
+var current_phase = Enums.CombatPhase.COMBAT_START
 var is_player_turn: bool = true
 
 ## Combatants
-var player_creatures: Array[CreatureInstance] = []  ## Creatures on the board
-var enemies: Array[EnemyInstance] = []
+var player_creatures: Array = []  ## Creatures on the board
+var enemies: Array = []
 
 ## Targeting
 var is_targeting: bool = false
-var targeting_card: CardInstance
+var targeting_card = null
 var valid_targets: Array = []
 
 ## Constants
@@ -36,7 +41,7 @@ const CARDS_PER_TURN = 5
 ## Reference to UI (set by combat screen)
 var combat_ui: Node
 
-func start_combat(enemy_data_list: Array[EnemyData]) -> void:
+func start_combat(enemy_data_list: Array) -> void:
 	is_combat_active = true
 	current_phase = Enums.CombatPhase.COMBAT_START
 
@@ -46,7 +51,7 @@ func start_combat(enemy_data_list: Array[EnemyData]) -> void:
 
 	# Create enemy instances
 	for i in range(enemy_data_list.size()):
-		var enemy = EnemyInstance.new(enemy_data_list[i])
+		var enemy = EnemyInstanceScript.new(enemy_data_list[i])
 		enemy.position = i
 		enemies.append(enemy)
 
@@ -71,8 +76,8 @@ func start_combat(enemy_data_list: Array[EnemyData]) -> void:
 
 func _draw_opening_hand() -> void:
 	# Check for innate cards first
-	var innate_cards: Array[CardInstance] = []
-	var other_cards: Array[CardInstance] = []
+	var innate_cards: Array = []
+	var other_cards: Array = []
 
 	for card in RunData.draw_pile:
 		if card.has_keyword(Enums.CardKeyword.INNATE):
@@ -103,7 +108,7 @@ func _start_player_turn() -> void:
 			creature.process_turn_start()
 
 	# Trigger traits
-	_trigger_traits(TraitData.TraitTrigger.ON_TURN_START)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_TURN_START)
 
 	# Draw cards
 	RunData.draw_cards(CARDS_PER_TURN - RunData.hand.size())
@@ -130,7 +135,7 @@ func end_player_turn() -> void:
 	RunData.discard_hand()
 
 	# Trigger traits
-	_trigger_traits(TraitData.TraitTrigger.ON_TURN_END)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_TURN_END)
 
 	turn_ended.emit(true)
 
@@ -180,7 +185,7 @@ func _start_enemy_turn() -> void:
 	await get_tree().create_timer(0.3).timeout
 	_start_player_turn()
 
-func _execute_enemy_intent(enemy: EnemyInstance) -> void:
+func _execute_enemy_intent(enemy) -> void:
 	var intent = enemy.current_intent
 	if not intent:
 		return
@@ -201,7 +206,7 @@ func _execute_enemy_intent(enemy: EnemyInstance) -> void:
 			# TODO: Implement summoning
 			pass
 
-func _enemy_attack(enemy: EnemyInstance, intent: IntentData) -> void:
+func _enemy_attack(enemy, intent) -> void:
 	var damage = enemy.get_attack_damage()
 
 	for hit in range(intent.hits):
@@ -237,7 +242,7 @@ func _enemy_attack(enemy: EnemyInstance, intent: IntentData) -> void:
 
 		await get_tree().create_timer(0.2).timeout
 
-func _get_leftmost_creature() -> CreatureInstance:
+func _get_leftmost_creature():
 	for creature in player_creatures:
 		if creature.is_alive():
 			return creature
@@ -245,7 +250,7 @@ func _get_leftmost_creature() -> CreatureInstance:
 
 ## Card playing
 
-func can_play_card(card: CardInstance) -> bool:
+func can_play_card(card) -> bool:
 	if not is_player_turn or current_phase != Enums.CombatPhase.PLAYER_ACTION:
 		return false
 
@@ -255,7 +260,7 @@ func can_play_card(card: CardInstance) -> bool:
 	var has_creatures = player_creatures.size() > 0
 	return card.can_be_played(RunData.energy, has_creatures)
 
-func play_card(card: CardInstance, targets: Array = []) -> void:
+func play_card(card, targets: Array = []) -> void:
 	if not can_play_card(card):
 		return
 
@@ -272,7 +277,7 @@ func play_card(card: CardInstance, targets: Array = []) -> void:
 	RunData.record_card_played()
 
 	# Trigger traits
-	_trigger_traits(TraitData.TraitTrigger.ON_CARD_PLAY)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_CARD_PLAY)
 
 	# Handle creature cards
 	if card.is_creature_card():
@@ -291,7 +296,7 @@ func play_card(card: CardInstance, targets: Array = []) -> void:
 	# Check for combat end
 	_check_combat_end()
 
-func _play_creature_card(card: CardInstance) -> void:
+func _play_creature_card(card) -> void:
 	if player_creatures.size() >= MAX_CREATURES_ON_BOARD:
 		return
 
@@ -301,20 +306,20 @@ func _play_creature_card(card: CardInstance) -> void:
 		if creature not in player_creatures:
 			player_creatures.append(creature)
 
-		_trigger_traits(TraitData.TraitTrigger.ON_CREATURE_PLAY)
+		_trigger_traits(TraitDataScript.TraitTrigger.ON_CREATURE_PLAY)
 
-func _play_action_card(card: CardInstance, targets: Array) -> void:
+func _play_action_card(card, targets: Array) -> void:
 	var action = card.get_action_data()
 	if not action:
 		return
 
-	_trigger_traits(TraitData.TraitTrigger.ON_ACTION_PLAY)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_ACTION_PLAY)
 
 	# Resolve effects
 	for effect in action.effects:
 		_resolve_effect(effect, card, targets)
 
-func _resolve_effect(effect: EffectData, card: CardInstance, targets: Array) -> void:
+func _resolve_effect(effect, card, targets: Array) -> void:
 	var value = effect.value
 
 	match effect.type:
@@ -322,7 +327,7 @@ func _resolve_effect(effect: EffectData, card: CardInstance, targets: Array) -> 
 			for target in targets:
 				var damage = value
 				# If targeting friendly creature, it attacks enemies
-				if target is CreatureInstance:
+				if target is CreatureInstanceScript:
 					damage = target.get_attack_damage() + value - target.current_attack
 					# Find enemy target (first alive enemy)
 					for enemy in enemies:
@@ -333,7 +338,7 @@ func _resolve_effect(effect: EffectData, card: CardInstance, targets: Array) -> 
 							if not enemy.is_alive():
 								_handle_enemy_death(enemy)
 							break
-				elif target is EnemyInstance:
+				elif target is EnemyInstanceScript:
 					var actual = target.take_damage(damage)
 					damage_dealt.emit(card, target, actual)
 					RunData.record_damage(actual)
@@ -342,17 +347,17 @@ func _resolve_effect(effect: EffectData, card: CardInstance, targets: Array) -> 
 
 		Enums.EffectType.SHIELD:
 			for target in targets:
-				if target is CreatureInstance:
+				if target is CreatureInstanceScript:
 					target.modify_status(Enums.StatusType.SHIELD, value)
 
 		Enums.EffectType.ARMOR:
 			for target in targets:
-				if target is CreatureInstance:
+				if target is CreatureInstanceScript:
 					target.modify_status(Enums.StatusType.ARMOR, value)
 
 		Enums.EffectType.HEAL:
 			for target in targets:
-				if target is CreatureInstance:
+				if target is CreatureInstanceScript:
 					target.heal(value)
 
 		Enums.EffectType.DRAW:
@@ -364,24 +369,24 @@ func _resolve_effect(effect: EffectData, card: CardInstance, targets: Array) -> 
 
 		Enums.EffectType.POISON:
 			for target in targets:
-				if target is EnemyInstance:
+				if target is EnemyInstanceScript:
 					target.modify_status(Enums.StatusType.POISON, value)
-				elif target is CreatureInstance:
+				elif target is CreatureInstanceScript:
 					target.modify_status(Enums.StatusType.POISON, value)
 
 		Enums.EffectType.STRENGTH:
 			for target in targets:
-				if target is CreatureInstance:
+				if target is CreatureInstanceScript:
 					target.modify_status(Enums.StatusType.STRENGTH, value)
 
 		Enums.EffectType.WEAKNESS:
 			for target in targets:
-				if target is EnemyInstance:
+				if target is EnemyInstanceScript:
 					target.modify_status(Enums.StatusType.WEAKNESS, value)
 
 ## Targeting
 
-func start_targeting(card: CardInstance) -> void:
+func start_targeting(card) -> void:
 	targeting_card = card
 	is_targeting = true
 	valid_targets = _get_valid_targets(card)
@@ -393,7 +398,7 @@ func cancel_targeting() -> void:
 	valid_targets.clear()
 	targeting_cancelled.emit()
 
-func select_target(target: Variant) -> void:
+func select_target(target) -> void:
 	if not is_targeting or not targeting_card:
 		return
 
@@ -403,7 +408,7 @@ func select_target(target: Variant) -> void:
 		targeting_card = null
 		valid_targets.clear()
 
-func _get_valid_targets(card: CardInstance) -> Array:
+func _get_valid_targets(card) -> Array:
 	var targets: Array = []
 
 	if card.is_creature_card():
@@ -438,18 +443,18 @@ func _get_valid_targets(card: CardInstance) -> Array:
 
 ## Death handling
 
-func _handle_creature_death(creature: CreatureInstance) -> void:
+func _handle_creature_death(creature) -> void:
 	creature.die()
 	player_creatures.erase(creature)
 	creature_died.emit(creature)
 
-	_trigger_traits(TraitData.TraitTrigger.ON_CREATURE_DEATH)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_CREATURE_DEATH)
 
-func _handle_enemy_death(enemy: EnemyInstance) -> void:
+func _handle_enemy_death(enemy) -> void:
 	enemies.erase(enemy)
 	enemy_died.emit(enemy)
 
-	_trigger_traits(TraitData.TraitTrigger.ON_ENEMY_DEATH)
+	_trigger_traits(TraitDataScript.TraitTrigger.ON_ENEMY_DEATH)
 
 ## Combat end
 
@@ -489,12 +494,12 @@ func _end_combat(victory: bool) -> void:
 
 ## Traits
 
-func _trigger_traits(trigger: TraitData.TraitTrigger) -> void:
+func _trigger_traits(trigger) -> void:
 	var matching_traits = RunData.get_traits_by_trigger(trigger)
 	for trait_data in matching_traits:
 		_apply_trait_effect(trait_data)
 
-func _apply_trait_effect(trait_data: TraitData) -> void:
+func _apply_trait_effect(trait_data) -> void:
 	# TODO: Implement trait effects based on effect_params
 	match trait_data.id:
 		"compound_eyes":

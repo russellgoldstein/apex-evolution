@@ -14,7 +14,7 @@ enum EvolutionType {
 @export var evolution_type: EvolutionType = EvolutionType.STAT
 
 ## The resulting creature card after evolution
-@export var result_creature: CreatureCardData
+@export var result_creature: Resource  # CreatureCardData
 
 ## Cost in Food Tokens
 @export var cost: int = 50

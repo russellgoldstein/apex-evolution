@@ -1,13 +1,23 @@
 extends Node
 ## RunData - Holds all state for the current run
 
+# Preload classes to ensure they're available
+const CardInstanceClass = preload("res://scripts/cards/card_instance.gd")
+const CreatureInstanceClass = preload("res://scripts/combat/creature_instance.gd")
+const TraitDataClass = preload("res://scripts/resources/trait_data.gd")
+const MapDataClass = preload("res://scripts/resources/map_data.gd")
+const EnemyDataClass = preload("res://scripts/resources/enemy_data.gd")
+const ArchetypeDataClass = preload("res://scripts/resources/archetype_data.gd")
+const CreatureCardDataClass = preload("res://scripts/resources/creature_card_data.gd")
+const CardDataClass = preload("res://scripts/resources/card_data.gd")
+
 signal player_hp_changed(new_hp: int, max_hp: int)
 signal food_tokens_changed(new_amount: int)
 signal energy_changed(new_energy: int, max_energy: int)
 signal deck_changed
-signal creature_added(creature: CreatureInstance)
-signal creature_removed(creature: CreatureInstance)
-signal trait_acquired(trait_data: TraitData)
+signal creature_added(creature)
+signal creature_removed(creature)
+signal trait_acquired(trait_data)
 
 ## Player stats
 var player_hp: int = 50
@@ -19,29 +29,29 @@ var energy: int = 3
 var max_energy: int = 3
 
 ## Deck
-var deck: Array[CardInstance] = []
-var draw_pile: Array[CardInstance] = []
-var hand: Array[CardInstance] = []
-var discard_pile: Array[CardInstance] = []
-var exhaust_pile: Array[CardInstance] = []
+var deck: Array = []
+var draw_pile: Array = []
+var hand: Array = []
+var discard_pile: Array = []
+var exhaust_pile: Array = []
 
 ## Creatures (persistent between combats)
-var creatures: Array[CreatureInstance] = []
+var creatures: Array = []
 var lead_creature_index: int = 0
 
 ## Traits
-var traits: Array[TraitData] = []
+var traits: Array = []
 
 ## Map progress
 var current_act: int = 1
-var current_map: MapData
-var maps: Array[MapData] = []  # One per act
+var current_map = null
+var maps: Array = []  # One per act
 
 ## Combat state (set before entering combat)
-var current_enemies: Array[EnemyData] = []
+var current_enemies: Array = []
 
 ## Archetype used this run
-var current_archetype: ArchetypeData
+var current_archetype = null
 
 ## Stats for end screen
 var total_damage_dealt: int = 0
@@ -86,22 +96,22 @@ func clear_run() -> void:
 	total_cards_played = 0
 	combats_won = 0
 
-func initialize_with_archetype(archetype: ArchetypeData) -> void:
+func initialize_with_archetype(archetype) -> void:
 	current_archetype = archetype
 
 	# Create starting creature instance
-	var creature = CreatureInstance.new(archetype.starting_creature)
+	var creature = CreatureInstanceClass.new(archetype.starting_creature)
 	creatures.append(creature)
 	lead_creature_index = 0
 
 	# Create creature card and add to deck
-	var creature_card = CardInstance.new(archetype.starting_creature)
+	var creature_card = CardInstanceClass.new(archetype.starting_creature)
 	creature_card.creature_instance = creature
 	deck.append(creature_card)
 
 	# Add starting action cards
 	for action_data in archetype.starting_deck:
-		var card = CardInstance.new(action_data)
+		var card = CardInstanceClass.new(action_data)
 		deck.append(card)
 
 	# Add starting trait
@@ -161,13 +171,13 @@ func gain_energy(amount: int) -> void:
 
 ## Deck management
 
-func add_card_to_deck(card_data: CardData) -> CardInstance:
-	var card = CardInstance.new(card_data)
+func add_card_to_deck(card_data):
+	var card = CardInstanceClass.new(card_data)
 	deck.append(card)
 	deck_changed.emit()
 	return card
 
-func remove_card_from_deck(card: CardInstance) -> void:
+func remove_card_from_deck(card) -> void:
 	deck.erase(card)
 	deck_changed.emit()
 
@@ -176,7 +186,7 @@ func get_deck_size() -> int:
 
 ## Combat setup
 
-func setup_combat(enemies: Array[EnemyData]) -> void:
+func setup_combat(enemies: Array) -> void:
 	current_enemies = enemies
 
 	# Reset combat piles
@@ -195,8 +205,8 @@ func setup_combat(enemies: Array[EnemyData]) -> void:
 func shuffle_draw_pile() -> void:
 	draw_pile.shuffle()
 
-func draw_cards(count: int) -> Array[CardInstance]:
-	var drawn: Array[CardInstance] = []
+func draw_cards(count: int) -> Array:
+	var drawn: Array = []
 
 	for i in range(count):
 		if draw_pile.is_empty():
@@ -214,11 +224,11 @@ func draw_cards(count: int) -> Array[CardInstance]:
 
 	return drawn
 
-func discard_card(card: CardInstance) -> void:
+func discard_card(card) -> void:
 	hand.erase(card)
 	discard_pile.append(card)
 
-func exhaust_card(card: CardInstance) -> void:
+func exhaust_card(card) -> void:
 	hand.erase(card)
 	exhaust_pile.append(card)
 
@@ -233,7 +243,7 @@ func discard_hand() -> void:
 		discard_pile.append(card)
 
 	# Remove non-retained action cards from hand
-	var retained: Array[CardInstance] = []
+	var retained: Array = []
 	for card in hand:
 		if card.is_creature_card() or card.has_keyword(Enums.CardKeyword.RETAIN):
 			retained.append(card)
@@ -241,7 +251,7 @@ func discard_hand() -> void:
 
 ## Creatures
 
-func get_lead_creature() -> CreatureInstance:
+func get_lead_creature():
 	if lead_creature_index >= 0 and lead_creature_index < creatures.size():
 		return creatures[lead_creature_index]
 	return null
@@ -250,15 +260,15 @@ func set_lead_creature(index: int) -> void:
 	if index >= 0 and index < creatures.size():
 		lead_creature_index = index
 
-func add_creature(creature_data: CreatureCardData) -> CreatureInstance:
+func add_creature(creature_data):
 	if creatures.size() >= 4:
 		return null  # Max 4 creatures
 
-	var creature = CreatureInstance.new(creature_data)
+	var creature = CreatureInstanceClass.new(creature_data)
 	creatures.append(creature)
 
 	# Add card to deck
-	var card = CardInstance.new(creature_data)
+	var card = CardInstanceClass.new(creature_data)
 	card.creature_instance = creature
 	deck.append(card)
 
@@ -266,15 +276,15 @@ func add_creature(creature_data: CreatureCardData) -> CreatureInstance:
 	deck_changed.emit()
 	return creature
 
-func get_alive_creatures() -> Array[CreatureInstance]:
-	var alive: Array[CreatureInstance] = []
+func get_alive_creatures() -> Array:
+	var alive: Array = []
 	for creature in creatures:
 		if creature.is_alive():
 			alive.append(creature)
 	return alive
 
-func get_creatures_on_board() -> Array[CreatureInstance]:
-	var on_board: Array[CreatureInstance] = []
+func get_creatures_on_board() -> Array:
+	var on_board: Array = []
 	for creature in creatures:
 		if creature.board_position >= 0 and creature.is_alive():
 			on_board.append(creature)
@@ -282,7 +292,7 @@ func get_creatures_on_board() -> Array[CreatureInstance]:
 
 ## Traits
 
-func add_trait(trait_data: TraitData) -> void:
+func add_trait(trait_data) -> void:
 	traits.append(trait_data)
 	trait_acquired.emit(trait_data)
 
@@ -292,8 +302,8 @@ func has_trait(trait_id: String) -> bool:
 			return true
 	return false
 
-func get_traits_by_trigger(trigger: TraitData.TraitTrigger) -> Array[TraitData]:
-	var matching: Array[TraitData] = []
+func get_traits_by_trigger(trigger) -> Array:
+	var matching: Array = []
 	for t in traits:
 		if t.trigger == trigger:
 			matching.append(t)
@@ -301,10 +311,10 @@ func get_traits_by_trigger(trigger: TraitData.TraitTrigger) -> Array[TraitData]:
 
 ## Map
 
-func get_current_map() -> MapData:
+func get_current_map():
 	return current_map
 
-func set_current_map(map: MapData) -> void:
+func set_current_map(map) -> void:
 	current_map = map
 	if current_act - 1 < maps.size():
 		maps[current_act - 1] = map

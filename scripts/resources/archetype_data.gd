@@ -7,13 +7,13 @@ extends Resource
 @export_multiline var description: String = ""
 
 ## Starting creature
-@export var starting_creature: CreatureCardData
+@export var starting_creature: Resource  # CreatureCardData
 
 ## Starting deck (action cards)
-@export var starting_deck: Array[ActionCardData] = []
+@export var starting_deck: Array = []  # Array of ActionCardData
 
 ## Starting trait
-@export var starting_trait: TraitData
+@export var starting_trait: Resource  # TraitData
 
 ## Visual
 @export var portrait: Texture2D

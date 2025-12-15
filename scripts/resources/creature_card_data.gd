@@ -11,7 +11,7 @@ extends CardData
 
 ## Evolution data
 @export var evolution_tier: int = 0
-@export var evolution_options: Array[EvolutionData] = []
+@export var evolution_options: Array = []  # Array of EvolutionData
 
 ## Special flags
 @export var has_flying: bool = false
@@ -27,7 +27,7 @@ func has_species(species: Enums.SpeciesType) -> bool:
 	return species in species_types
 
 func get_species_string() -> String:
-	var names: Array[String] = []
+	var names: Array = []
 	for species in species_types:
 		match species:
 			Enums.SpeciesType.INSECTOID:
@@ -43,7 +43,7 @@ func get_species_string() -> String:
 	return " / ".join(names)
 
 func get_full_description() -> String:
-	var parts: Array[String] = []
+	var parts: Array = []
 
 	# Species types
 	if species_types.size() > 0:

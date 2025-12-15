@@ -12,7 +12,7 @@ extends Resource
 @export var placeholder_color: Color = Color(0.6, 0.2, 0.2)  ## Red-ish for enemies
 
 ## Intent pattern - cycles through these
-@export var intent_pattern: Array[IntentData] = []
+@export var intent_pattern: Array = []  # Array of IntentData
 
 ## Special abilities
 @export var has_flying: bool = false

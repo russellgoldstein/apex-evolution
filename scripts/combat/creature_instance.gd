@@ -2,7 +2,10 @@ class_name CreatureInstance
 extends RefCounted
 ## Runtime instance of a creature with current state
 
-var data: CreatureCardData
+# Preload to ensure class is available
+const CreatureCardDataScript = preload("res://scripts/resources/creature_card_data.gd")
+
+var data  # CreatureCardData
 var instance_id: int  ## Unique ID for this instance
 
 ## Current stats (can differ from base due to buffs/damage)
@@ -21,11 +24,11 @@ var is_exhausted: bool = false
 
 ## Evolution state
 var evolution_tier: int = 0
-var evolved_data: CreatureCardData  ## Current evolved form (or base if not evolved)
+var evolved_data  ## Current evolved form (or base if not evolved)
 
 static var _next_id: int = 0
 
-func _init(creature_data: CreatureCardData) -> void:
+func _init(creature_data) -> void:
 	data = creature_data
 	evolved_data = creature_data
 	instance_id = _next_id
@@ -140,7 +143,7 @@ func die() -> void:
 	is_exhausted = true
 	board_position = -1
 
-func evolve(new_data: CreatureCardData) -> void:
+func evolve(new_data) -> void:
 	## Apply an evolution
 	evolved_data = new_data
 	evolution_tier += 1

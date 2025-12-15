@@ -4,13 +4,13 @@ extends CardData
 
 @export var target_type: Enums.TargetType = Enums.TargetType.FRIENDLY_CREATURE
 @export var requires_creature: bool = true  ## If true, can only play when you have creatures on board
-@export var effects: Array[EffectData] = []
+@export var effects: Array = []  # Array of EffectData
 
 ## Reference to upgraded version of this card
-@export var upgraded_version: ActionCardData
+@export var upgraded_version: Resource  # ActionCardData
 
 ## For creature summon cards
-@export var summons_creature: CreatureCardData
+@export var summons_creature: Resource  # CreatureCardData
 
 func _init():
 	placeholder_color = Color(0.3, 0.3, 0.6)  ## Blue-ish for actions
@@ -22,7 +22,7 @@ func is_upgraded() -> bool:
 	return upgraded_version == null and id.ends_with("+")
 
 func get_full_description() -> String:
-	var parts: Array[String] = []
+	var parts: Array = []
 
 	# Keywords
 	for keyword in keywords:

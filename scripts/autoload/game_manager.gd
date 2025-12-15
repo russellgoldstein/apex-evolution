@@ -99,11 +99,11 @@ func start_new_run() -> void:
 	RunData.start_new_run()
 	change_state(Enums.GameState.ARCHETYPE_SELECT)
 
-func select_archetype(archetype: ArchetypeData) -> void:
+func select_archetype(archetype) -> void:
 	RunData.initialize_with_archetype(archetype)
 	change_state(Enums.GameState.MAP)
 
-func enter_combat(enemies: Array[EnemyData]) -> void:
+func enter_combat(enemies: Array) -> void:
 	RunData.setup_combat(enemies)
 	change_state(Enums.GameState.COMBAT)
 

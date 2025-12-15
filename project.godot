@@ -14,6 +14,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Enums="*res://scripts/enums.gd"
 GameManager="*res://scripts/autoload/game_manager.gd"
 RunData="*res://scripts/autoload/run_data.gd"
 AudioManager="*res://scripts/autoload/audio_manager.gd"
@@ -26,10 +27,6 @@ window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
-
-[gui]
-
-theme/custom_font="res://assets/fonts/default_font.tres"
 
 [input]
 

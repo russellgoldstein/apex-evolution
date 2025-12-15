@@ -17,7 +17,7 @@ func has_keyword(keyword: Enums.CardKeyword) -> bool:
 	return keyword in keywords
 
 func get_full_description() -> String:
-	var parts: Array[String] = []
+	var parts: Array = []
 
 	# Add keywords at the top
 	for keyword in keywords:

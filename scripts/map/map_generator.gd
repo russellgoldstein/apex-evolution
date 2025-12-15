@@ -213,20 +213,20 @@ func _assign_enemies(map: MapData, act: int) -> void:
 				Enums.NodeType.COMBAT:
 					# 1-3 basic enemies
 					var enemy_count = randi_range(1, 2 + act - 1)
-					var enemies: Array[EnemyData] = []
+					var enemies: Array = []
 					for i in range(enemy_count):
 						enemies.append(basic_enemies[randi() % basic_enemies.size()])
 					map_node.enemies = enemies
 
 				Enums.NodeType.ELITE:
-					var enemies: Array[EnemyData] = [elite_enemies[randi() % elite_enemies.size()]]
+					var enemies: Array = [elite_enemies[randi() % elite_enemies.size()]]
 					map_node.enemies = enemies
 
 				Enums.NodeType.BOSS:
 					map_node.enemies = [boss_enemy]
 
-func _get_basic_enemies(act: int) -> Array[EnemyData]:
-	var enemies: Array[EnemyData] = []
+func _get_basic_enemies(act: int) -> Array:
+	var enemies: Array = []
 
 	# Scavenger
 	var scavenger = EnemyData.new()
@@ -282,8 +282,8 @@ func _get_basic_enemies(act: int) -> Array[EnemyData]:
 
 	return enemies
 
-func _get_elite_enemies(act: int) -> Array[EnemyData]:
-	var enemies: Array[EnemyData] = []
+func _get_elite_enemies(act: int) -> Array:
+	var enemies: Array = []
 
 	# Alpha Predator
 	var alpha = EnemyData.new()
