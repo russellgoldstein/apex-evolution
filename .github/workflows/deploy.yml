@@ -39,7 +39,7 @@ jobs:
         run: |
           cd build/web
           # Download coi-serviceworker for cross-origin isolation (needed for threads)
-          wget -q https://raw.githubusercontent.com/nicolevanderhoeven/coi-serviceworker/main/coi-serviceworker.min.js -O coi-serviceworker.js
+          wget -q https://raw.githubusercontent.com/gzuidhof/coi-serviceworker/master/coi-serviceworker.min.js -O coi-serviceworker.js
           # Inject the service worker script into index.html
           sed -i 's|<head>|<head>\n\t<script src="coi-serviceworker.js"></script>|' index.html
 
