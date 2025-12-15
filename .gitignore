@@ -1,0 +1,31 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+export_credentials.cfg
+
+# Imported textures and samples
+.import/
+
+# Build outputs
+build/
+
+# OS/IDE generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Logs
+*.log

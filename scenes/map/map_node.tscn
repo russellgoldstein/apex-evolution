@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://mapnode"]
+
+[node name="MapNode" type="Button"]
+custom_minimum_size = Vector2(60, 60)
+offset_right = 60.0
+offset_bottom = 60.0

@@ -1,0 +1,121 @@
+[gd_scene load_steps=2 format=3 uid="uid://mapscreen"]
+
+[ext_resource type="Script" path="res://scripts/screens/map_screen.gd" id="1_map"]
+
+[node name="MapScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_map")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 50.0
+grow_horizontal = 2
+theme_override_constants/separation = 20
+
+[node name="ActLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.91, 0.58, 0.22, 1)
+theme_override_font_sizes/font_size = 22
+text = "Act 1: The Shallows"
+vertical_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "HP: 50/50 | FT: 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+
+[node name="MapContainer" type="Control" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Legend" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -200.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="LegendTitle" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Legend:"
+
+[node name="Combat" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 10
+text = "! = Combat"
+
+[node name="Elite" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+theme_override_font_sizes/font_size = 10
+text = "!! = Elite"
+
+[node name="Shop" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 10
+text = "$ = Shop"
+
+[node name="Trait" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.4, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "* = Trait"
+
+[node name="Rest" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.7, 1, 1)
+theme_override_font_sizes/font_size = 10
+text = "R = Rest"
+
+[node name="Mystery" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+text = "? = Mystery"
+
+[node name="Boss" type="Label" parent="Legend"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 10
+text = "B = Boss"
